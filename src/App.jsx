@@ -1,4 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+
+// Funzione debounce generica
+function debounce(callback, delay) {
+  let timer;
+  return (value) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      callback(value);
+    }, delay);
+  };
+}
 
 function App() {
   const [query, setQuery] = useState("");
@@ -13,13 +24,16 @@ function App() {
       const response = await fetch(`//localhost:3333/products?search=${query}`);
       const data = await response.json();
       setSuggestions(data);
+      console.log(`API ${query}`);
     } catch (error) {
       console.error(error);
     }
   };
 
+  const debouncedFetchProducts = useCallback(debounce(fetchProducts, 500), []);
+
   useEffect(() => {
-    fetchProducts(query);
+    debouncedFetchProducts(query);
   }, [query]);
 
   return (

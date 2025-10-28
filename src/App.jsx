@@ -1,9 +1,49 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function App() {
+  const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+
+  const fetchProducts = async (query) => {
+    if (!query.trim()) {
+      setSuggestions([]);
+      return;
+    }
+    try {
+      const response = await fetch(`//localhost:3333/products?search=${query}`);
+      const data = await response.json();
+      setSuggestions(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts(query);
+  }, [query]);
+
   return (
     <>
-      <div></div>
+      <div>
+        <h1>Autocomplete</h1>
+        <input
+          type="text"
+          placeholder="Cerca il prodotto"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        {suggestions.length > 0 && (
+          <div className="suggestions-container">
+            <div className="suggestions-list">
+              {suggestions.map((product) => (
+                <div key={product.id} className="suggestion-item">
+                  {product.name}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </>
   );
 }
